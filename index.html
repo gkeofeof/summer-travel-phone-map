@@ -351,13 +351,26 @@
             body.show-right #sidebar { transform: translateX(0) !important; }
             
             /* 隱藏拖曳狀態的強制展開 (避免手機上誤觸) */
-            body.is-dragging #left-sidebar, body.is-dragging #sidebar {
-                transform: none !important; 
+            /* 隱藏拖曳狀態的強制展開 (避免手機上誤觸) */
+            /* 🌟 終極修復：手機版拖曳時，自動切換成「左右各 50%」的分割畫面 */
+            body.is-dragging #left-sidebar {
+                width: 50vw !important;
+                transform: translateX(0) !important;
+                padding: 10px !important; /* 稍微縮小內距避免卡片被擠破 */
+                z-index: 2000;
+            }
+            body.is-dragging #sidebar {
+                width: 50vw !important;
+                transform: translateX(0) !important;
+                padding: 10px !important;
+                z-index: 2000;
+            }
+            /* 拖曳時把底下那些按鈕藏起來，避免擋住視線 */
+            body.is-dragging .mobile-toggle-btn {
+                display: none !important;
             }
         }
-
-
-
+        
     </style>
 </head>
 <body>
