@@ -14,6 +14,18 @@
             overflow: hidden; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        /* 🌟 終極鎖定 1：強制鎖死網頁底層，不允許任何水平偏移與邊緣回彈 */
+        html {
+            overflow: hidden !important;
+            width: 100vw !important;
+            overscroll-behavior: none; /* 關閉 iOS / Android 的橡皮筋邊緣回彈效果 */
+        }
+
+        /* 🌟 終極鎖定 2：當正在拖曳卡片時，強制關閉瀏覽器的原生畫面拖拉功能 */
+        body.is-dragging {
+            touch-action: none !important; 
+        }
+        
         #top-nav {
             position: absolute;
             top: 0; left: 0;
