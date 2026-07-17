@@ -336,41 +336,31 @@
             /* 顯示浮動按鈕 */
             .mobile-toggle-btn { display: block; }
             
-            /* 將左右側邊欄變成 100% 寬度，並預設完全收合 */
-            #left-sidebar {
-                width: 100vw !important;
-                transform: translateX(-100%) !important;
+            #left-sidebar, #sidebar {
+                width: 100vw !important; /* 保持全螢幕，視野最大化 */
+                transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important; /* 加上滑順的切換動畫 */
             }
-            #sidebar {
-                width: 100vw !important;
-                transform: translateX(100%) !important;
-            }
+            #left-sidebar { transform: translateX(-100%) !important; }
+            #sidebar { transform: translateX(100%) !important; }
 
-            /* 透過加上 specific class 來強制展開側邊欄 */
+            /* 點擊底部按鈕的展開狀態 */
             body.show-left #left-sidebar { transform: translateX(0) !important; }
             body.show-right #sidebar { transform: translateX(0) !important; }
-            
-            /* 隱藏拖曳狀態的強制展開 (避免手機上誤觸) */
-            /* 隱藏拖曳狀態的強制展開 (避免手機上誤觸) */
-            /* 🌟 終極修復：手機版拖曳時，自動切換成「左右各 50%」的分割畫面 */
-            body.is-dragging #left-sidebar {
-                width: 50vw !important;
-                transform: translateX(0) !important;
-                padding: 10px !important; /* 稍微縮小內距避免卡片被擠破 */
-                z-index: 2000;
-            }
-            body.is-dragging #sidebar {
-                width: 50vw !important;
-                transform: translateX(0) !important;
-                padding: 10px !important;
-                z-index: 2000;
-            }
-            /* 拖曳時把底下那些按鈕藏起來，避免擋住視線 */
-            body.is-dragging .mobile-toggle-btn {
-                display: none !important;
-            }
+
+            /* 拖曳狀態下的底層按鈕隱藏 */
+            body.is-dragging .mobile-toggle-btn { display: none !important; }
+
+            /* 🌟 手指在左半邊時：只顯示左側暫存區 */
+            body.drag-left #left-sidebar { transform: translateX(0) !important; z-index: 2000; }
+            body.drag-left #sidebar { transform: translateX(100%) !important; }
+
+            /* 🌟 手指在右半邊時：只顯示右側行程表 */
+            body.drag-right #left-sidebar { transform: translateX(-100%) !important; }
+            body.drag-right #sidebar { transform: translateX(0) !important; z-index: 2000; }
         }
-        
+
+
+
     </style>
 </head>
 <body>
@@ -819,18 +809,45 @@
                 animation: 150,
                 ghostClass: 'sortable-ghost',
                 
-                // ==========================================
-                // 🌟 新增：解決手機版跨區拖拉卡死的核心設定
-                // ==========================================
-                delay: 150,                 // 1. 觸控延遲：長按 150 毫秒才觸發拖曳。這樣你在手機上單純上下滑動時，才不會不小心抓起卡片。
-                delayOnTouchOnly: true,     // 2. 限定手機：只有手機觸控才需要延遲，電腦版用滑鼠依然是「秒抓秒拉」。
-                forceFallback: true,        // 3. 強制關閉原生拖曳：捨棄手機上充滿 Bug 的 HTML5 拖曳，改用 JS 模擬。
-                fallbackOnBody: true,       // 4. 幽靈卡片置頂：將拖曳中的卡片強制拉到網頁的最頂層 (Body)，打破原本側邊欄的限制，跨區拖拉不再被阻擋！
-                // ==========================================
+                // 手機版專屬優化
+                delay: 150,
+                delayOnTouchOnly: true,
+                forceFallback: true,
+                fallbackOnBody: true,
+                
+                // 🌟 新增：邊緣自動滾動設定 (往上/往下拖曳時，選單會自動捲動)
+                scroll: true,
+                scrollSensitivity: 80, // 距離螢幕上下邊緣 80px 時開始滾動 (手機上建議設大一點)
+                scrollSpeed: 15,       // 滾動的速度
 
-                // 抓起卡片的瞬間：加上 is-dragging 標籤，強制展開兩側！
+                // 抓起卡片的瞬間
                 onStart: function(evt) {
                     document.body.classList.add('is-dragging');
+                    
+                    // 🌟 新增：手機版手指追蹤切換邏輯
+                    if (window.innerWidth <= 768) {
+                        // 判斷一開始是抓左邊還是右邊的卡片，給予初始面板狀態
+                        if (evt.from.closest('#left-sidebar')) {
+                            document.body.classList.add('drag-left');
+                        } else {
+                            document.body.classList.add('drag-right');
+                        }
+                        
+                        // 監聽手指移動，一旦跨越螢幕中線，立刻切換面板！
+                        document.dragMoveHandler = function(e) {
+                            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                            if (clientX > window.innerWidth / 2) {
+                                document.body.classList.add('drag-right');
+                                document.body.classList.remove('drag-left');
+                            } else {
+                                document.body.classList.add('drag-left');
+                                document.body.classList.remove('drag-right');
+                            }
+                        };
+                        // 綁定追蹤事件
+                        document.addEventListener('touchmove', document.dragMoveHandler, {passive: true});
+                        document.addEventListener('mousemove', document.dragMoveHandler, {passive: true});
+                    }
                 },
 
                 // 跨區塊拖曳放入時
@@ -850,9 +867,15 @@
                     }
                 },
                 
-                // 放下卡片時：移除 is-dragging 標籤，讓側邊欄收回
+                // 放下卡片時
                 onEnd: function(evt) {
-                    document.body.classList.remove('is-dragging');
+                    // 🌟 清除所有拖曳狀態與追蹤器，讓畫面恢復原狀
+                    document.body.classList.remove('is-dragging', 'drag-left', 'drag-right');
+                    if (document.dragMoveHandler) {
+                        document.removeEventListener('touchmove', document.dragMoveHandler);
+                        document.removeEventListener('mousemove', document.dragMoveHandler);
+                        document.dragMoveHandler = null;
+                    }
 
                     if (evt.from === evt.to) {
                         const dataArray = getArrayById(evt.to.id);
