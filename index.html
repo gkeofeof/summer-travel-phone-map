@@ -167,8 +167,7 @@
         .drag-item.food-item { border-left: 5px solid #0dcaf0; }      /* 美食藍色 */
         
         .drag-item:active { cursor: grabbing; opacity: 0.8; transform: scale(0.98); }
-        .sortable-ghost { opacity: 0.4; background-color: #e9ecef; }
-
+       
         /* 彈跳視窗 Modal 樣式 */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -358,12 +357,32 @@
             body.drag-right #left-sidebar { transform: translateX(-100%) !important; }
             body.drag-right #sidebar { transform: translateX(0) !important; z-index: 2000; }
         }
+        .sortable-ghost {
+            background-color: #f8f9fa !important;
+            border: 2px dashed #adb5bd !important;
+            opacity: 1 !important;
+            transition: none !important; /* 🛑 強制關閉動畫，解決原地顫抖的關鍵 */
+        }
+        /* 把佔位符裡面的文字與圖片隱藏，只顯示空殼降落區 */
+        .sortable-ghost * {
+            visibility: hidden !important; 
+        }
 
+        /* 2. 跟著手指飛的卡片 (Fallback)：變回實體，加上浮空陰影 */
         .sortable-fallback {
-            transition: none !important; /* 強制關閉 CSS 動畫，讓 JS 完全接管位置，不再拉扯！ */
-            pointer-events: none !important; /* 讓幽靈卡片穿透，避免干擾手指座標判定 */
-            z-index: 9999 !important; /* 確保拖曳中的卡片絕對在所有畫面的最上層 */
-            opacity: 0.9 !important; /* 稍微透明一點，讓你看得見底下的目標清單 */
+            opacity: 1 !important; /* 變回實體，不再是透明的 */
+            background-color: #ffffff !important;
+            transition: none !important; 
+            pointer-events: none !important; /* 讓卡片穿透手指，避免干擾判定 */
+            z-index: 9999 !important; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important; /* 加上超有質感的浮空陰影 */
+            transform: scale(1.02) !important; /* 微微放大，更有抓起來的感覺 */
+        }
+        
+        /* 3. 終極保險：確保所有卡片在整個拖曳期間，絕對不能有任何 CSS 動畫干擾 */
+        body.is-dragging .drag-item, 
+        body.is-dragging .itinerary-item {
+            transition: none !important;
         }
 
     </style>
