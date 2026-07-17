@@ -359,7 +359,12 @@
             body.drag-right #sidebar { transform: translateX(0) !important; z-index: 2000; }
         }
 
-
+        .sortable-fallback {
+            transition: none !important; /* 強制關閉 CSS 動畫，讓 JS 完全接管位置，不再拉扯！ */
+            pointer-events: none !important; /* 讓幽靈卡片穿透，避免干擾手指座標判定 */
+            z-index: 9999 !important; /* 確保拖曳中的卡片絕對在所有畫面的最上層 */
+            opacity: 0.9 !important; /* 稍微透明一點，讓你看得見底下的目標清單 */
+        }
 
     </style>
 </head>
