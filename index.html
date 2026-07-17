@@ -1018,13 +1018,21 @@
         document.getElementById('export-btn').addEventListener('click', () => {
             const dataStr = JSON.stringify(itineraryData);
             
-            // 嘗試自動複製到剪貼簿
-            navigator.clipboard.writeText(dataStr).then(() => {
-                alert("✅ 行程代碼已成功複製！\n\n請打開 LINE 或記事本，將這串代碼貼上並傳送到您的手機。");
-            }).catch(err => {
-                // 如果瀏覽器阻擋自動複製，改用手動複製
-                prompt("您的瀏覽器不支援自動複製，請手動全選並複製以下代碼：", dataStr);
-            });
+            // 動作 1：依然嘗試複製到剪貼簿 (方便資料少時使用)
+            navigator.clipboard.writeText(dataStr).catch(err => console.log('自動複製失敗', err));
+
+            // 動作 2：強制產生 .txt 實體檔案並自動下載
+            const blob = new Blob([dataStr], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "夏日之旅_行程備份.txt"; // 下載的檔案名稱
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            alert("✅ 行程資料已準備完畢！\n\n系統已自動為您下載一份「夏日之旅_行程備份.txt」檔案。\n\n【如何傳到手機？】\n請打開 LINE，直接把這個 .txt 檔案當作「附件」傳給自己或群組。在手機上點開該檔案，全選複製裡面的文字，再貼到網頁匯入即可！");
         });
 
         document.getElementById('import-btn').addEventListener('click', () => {
