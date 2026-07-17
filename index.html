@@ -810,7 +810,6 @@
             return null;
         }
 
-        // 🌟 統一的拖曳處理核心 (包含強制展開側邊欄)
         function createSortableGroup(elementId) {
             const element = document.getElementById(elementId);
             if(!element) return;
@@ -820,6 +819,15 @@
                 animation: 150,
                 ghostClass: 'sortable-ghost',
                 
+                // ==========================================
+                // 🌟 新增：解決手機版跨區拖拉卡死的核心設定
+                // ==========================================
+                delay: 150,                 // 1. 觸控延遲：長按 150 毫秒才觸發拖曳。這樣你在手機上單純上下滑動時，才不會不小心抓起卡片。
+                delayOnTouchOnly: true,     // 2. 限定手機：只有手機觸控才需要延遲，電腦版用滑鼠依然是「秒抓秒拉」。
+                forceFallback: true,        // 3. 強制關閉原生拖曳：捨棄手機上充滿 Bug 的 HTML5 拖曳，改用 JS 模擬。
+                fallbackOnBody: true,       // 4. 幽靈卡片置頂：將拖曳中的卡片強制拉到網頁的最頂層 (Body)，打破原本側邊欄的限制，跨區拖拉不再被阻擋！
+                // ==========================================
+
                 // 抓起卡片的瞬間：加上 is-dragging 標籤，強制展開兩側！
                 onStart: function(evt) {
                     document.body.classList.add('is-dragging');
