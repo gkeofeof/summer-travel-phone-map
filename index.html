@@ -399,12 +399,11 @@
         #lobby-container {
             width: 100vw;
             height: 100vh;
-            overflow-y: auto; /* 確保行程卡片變多時可以往下捲動 */
-            
-            /* 拿鐵大地色與草莓淺粉交織的夢幻漸層 */
-            background: linear-gradient(-45deg, #faf0e6, #fff0f5, #fdf5e6, #ffe4e1);
-            background-size: 400% 400%;
-            animation: dreamySky 15s ease infinite;
+            overflow-y: auto; 
+            /* 換成深邃的太空暗色 */
+            background-color: #050510;
+            background-image: radial-gradient(circle at 50% 30%, #1a1a2e 0%, #050510 100%);
+            color: #ffffff; /* 預設文字變白 */
         }
 
         /* 漸層流動動畫 */
@@ -417,72 +416,21 @@
 
         .lobby-header {
             text-align: center;
-            padding: 40px 20px 20px 20px;
-            display: flex; /* 改用 Flex 讓內容置中對齊 */
+            padding: 20px 20px 20px 20px;
+            display: flex;
             flex-direction: column;
             align-items: center;
         }
 
         .lobby-header h1 {
             font-size: 2.5rem;
-            color: #333;
-            margin: 10px 0;
+            color: #ffffff; /* 大標題變白色 */
+            margin: -20px 0 10px 0;
+            text-shadow: 0 0 15px rgba(0, 150, 255, 0.5); /* 加上藍色科技發光感 */
         }
-
-        /* 🪐 宇宙場景容器 */
-        .space-scene {
-            position: relative;
-            width: 110px;
-            height: 110px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-
-        /* 🌍 地球本體 (微微上下浮動) */
-        .earth {
-            font-size: 4.5rem;
-            z-index: 2;
-            animation: floatEarth 3s ease-in-out infinite;
-        }
-
-        /* 💫 衛星軌道 (虛線圈圈，不斷旋轉) */
-        .orbit {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 2px dashed rgba(150, 150, 150, 0.4);
-            animation: spinOrbit 6s linear infinite;
-            z-index: 1;
-        }
-
-        /* 🛰️ 衛星本體 (附著在軌道邊緣) */
-        .satellite {
-            position: absolute;
-            top: -15px; /* 放在軌道最上方 */
-            left: 50%;
-            margin-left: -14px; /* 將中心點對齊 */
-            font-size: 1.5rem;
-            /* 讓衛星本身反向旋轉，這樣它轉圈時才不會倒立 */
-            animation: counterSpin 6s linear infinite;
-        }
-
-        /* --- 動畫設定 (Keyframes) --- */
-        @keyframes floatEarth {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-
-        @keyframes spinOrbit {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes counterSpin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(-360deg); }
+        
+        .lobby-header p {
+            color: #b0c4de;
         }
 
         .room-grid {
@@ -494,15 +442,13 @@
             margin: 0 auto;
         }
 
+        /* --- 科技感半透明玻璃卡片 --- */
         .room-card {
-            /* 👇 替換這兩行，讓卡片有一點點透出背景的漸層色 👇 */
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(20, 30, 50, 0.6);
             backdrop-filter: blur(10px);
-            /* 👆 ------------------------------------------ 👆 */
-            
             border-radius: 15px;
             padding: 25px 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
             text-align: center;
@@ -510,43 +456,35 @@
             flex-direction: column;
             justify-content: center;
             min-height: 150px;
-            border: 2px solid white; /* 加上白邊會很精緻 */
+            border: 1px solid rgba(255, 255, 255, 0.15); /* 微微的白邊 */
         }
 
         .room-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            background: rgba(255, 255, 255, 0.95); /* 滑鼠游標移過去時變亮 */
-            border-color: #ff9a9e;
+            box-shadow: 0 8px 25px rgba(0, 150, 255, 0.3); /* 滑過發藍光 */
+            background: rgba(30, 45, 75, 0.8);
+            border-color: #00d2ff;
         }
 
         .room-card h3 {
             margin: 0 0 10px 0;
-            color: #444;
+            color: #ffffff; /* 卡片標題變白 */
         }
 
         .room-card .status {
             font-size: 0.9rem;
-            color: #777;
+            color: #00d2ff; /* 狀態變科技藍 */
             margin-bottom: 10px;
         }
 
-        .room-card .date {
-            font-size: 0.8rem;
-            color: #aaa;
-            margin-top: auto;
-        }
-
-        /* ➕ 新增按鈕專屬樣式 */
         .create-new {
-            background: #f8f9fa;
-            border: 2px dashed #ccc;
-            box-shadow: none;
+            background: rgba(10, 15, 25, 0.4);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
         }
 
         .create-new:hover {
-            background: #fff0f0;
-            border: 2px dashed #ff9a9e;
+            background: rgba(0, 150, 255, 0.1);
+            border: 2px dashed #00d2ff;
         }
 
         .plus-icon {
@@ -616,13 +554,7 @@
 <body>
     <div id="lobby-container" style="display: none;">
         <div class="lobby-header">
-            <!-- 🌍 衛星繞地球的動畫場景 -->
-            <div class="space-scene">
-                <div class="earth">🌍</div>
-                <div class="orbit">
-                    <div class="satellite">🛰️</div>
-                </div>
-            </div>
+            <div id="earth-3d-container" style="width: 350px; height: 350px; margin: 0 auto; cursor: grab;"></div>
             <h1>探索行程大廳</h1>
             <p>點擊卡片查看大家分享的行程，或建立專屬於你的旅程！</p>
         </div>
@@ -649,6 +581,7 @@
             <div class="nav-item" style="font-weight: bold; margin-right: 10px;">📌 快捷工具</div>
             <!-- 下方可以自由替換成你常用的網站連結 -->
             <a href="https://transit.yahoo.co.jp/" target="_blank" class="nav-item">🚆 Yahoo! 乘車換乘</a>
+            <a href="#" id="btn-change-pwd" class="nav-item" style="color: #ffc107;">🔐 修改權限</a>
             <a href="https://www.google.com/maps" target="_blank" class="nav-item">🗺️ Google Maps</a>
             <a href="https://translate.google.com/?hl=zh-TW" target="_blank" class="nav-item">🈺 Google 翻譯</a>
             <a href="https://tenki.jp/" target="_blank" class="nav-item">⛅ 日本天氣預報</a>
@@ -811,6 +744,9 @@
     <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     
+    <!-- 引入 3D 地球套件 -->
+    <script src="https://unpkg.com/globe.gl"></script>
+
     <!-- 👇 新增 Firebase 雲端套件 👇 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -861,6 +797,42 @@
             // ==========================================
             lobbyContainer.style.display = 'block';
             plannerContainer.style.display = 'none';
+
+            setTimeout(() => {
+                const globeContainer = document.getElementById('earth-3d-container');
+                
+                // 創造環繞的衛星軌道數據 (假資料，製造 NASA 截圖那種發光線條感)
+                const orbitData = [...Array(10).keys()].map(() => ({
+                    startLat: (Math.random() - 0.5) * 180,
+                    startLng: (Math.random() - 0.5) * 360,
+                    endLat: (Math.random() - 0.5) * 180,
+                    endLng: (Math.random() - 0.5) * 360,
+                    color: ['#00d2ff', '#ffaa00', '#ffffff'][Math.floor(Math.random() * 3)]
+                }));
+
+                const myGlobe = Globe()(globeContainer)
+                    .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg') // 高解析地球材質
+                    .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')     // 凹凸地形陰影
+                    .backgroundColor('rgba(0,0,0,0)') // 背景透明，讓後面的深色星空露出來
+                    .showAtmosphere(true)             // 開啟大氣層發光效果
+                    .atmosphereColor('#00aaff')       // 大氣層發藍光
+                    .atmosphereAltitude(0.2)
+                    .width(350)
+                    .height(350)
+                    // 加入衛星軌道動畫 (Arcs)
+                    .arcsData(orbitData)
+                    .arcColor('color')
+                    .arcAltitudeAutoScale(0.4)
+                    .arcDashLength(0.5)
+                    .arcDashGap(2)
+                    .arcDashAnimateTime(4000);
+
+                // 設定自動旋轉與限制縮放
+                myGlobe.controls().autoRotate = true;
+                myGlobe.controls().autoRotateSpeed = 2.5; // 自轉速度
+                myGlobe.controls().enableZoom = false;    // 關閉滾輪縮放，避免卡住網頁捲動
+            }, 100);
+            
 
             // 1. 綁定「➕ 建立新行程」按鈕
             document.getElementById('create-room-btn').addEventListener('click', () => {
@@ -949,7 +921,36 @@
                 if (dbData.hasPassword) {
                     currentRoomPassword = prompt("🔒 此行程已加密，請輸入「編輯密碼」：\n(若取消或輸入錯誤，您將只能檢視無法修改)") || "";
                 }
+                
+                const btnChangePwd = document.getElementById('btn-change-pwd');
+                if (btnChangePwd) {
+                    btnChangePwd.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        
+                        // 1. 詢問新的密碼
+                        const newPwd = prompt("🛡️【權限設定】\n請輸入這個行程「新的」編輯密碼：\n（若希望取消密碼、讓所有人公開共編，請直接留白並按確定）");
+                        
+                        // 如果使用者按了取消 (null)，就什麼都不做
+                        if (newPwd === null) return; 
 
+                        // 2. 向 Firebase 送出更新請求
+                        // 這裡最關鍵：我們必須同時把「當前舊密碼 (currentRoomPassword)」丟進 auth_pwd 給 Firebase 檢查，
+                        // 檢查通過後，Firebase 才會允許我們把 password 更新成 newPwd！
+                        roomRef.update({
+                            password: newPwd,
+                            hasPassword: (newPwd !== ""), // 如果新密碼不是空的，就標記為 true (大廳才會顯示鎖頭)
+                            auth_pwd: currentRoomPassword // 拿舊密碼當作通行證
+                        }).then(() => {
+                            alert("✅ 權限修改成功！大廳狀態已同步更新。");
+                            // 更新網頁目前記憶的密碼，這樣後續存檔才不會失敗
+                            currentRoomPassword = newPwd; 
+                        }).catch(error => {
+                            console.error(error);
+                            alert("❌ 修改失敗！您可能沒有修改權限，或是當前連線異常。");
+                        });
+                    });
+                }
+                
                 // 綁定資料變更監聽器
                 roomRef.child('data').on('value', (snap) => {
                     const data = snap.val();
