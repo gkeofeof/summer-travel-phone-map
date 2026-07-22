@@ -395,6 +395,26 @@
             transition: none !important;
         }
 
+        /* --- 🌌 大廳動態背景與滿版設定 --- */
+        #lobby-container {
+            width: 100vw;
+            height: 100vh;
+            overflow-y: auto; /* 確保行程卡片變多時可以往下捲動 */
+            
+            /* 拿鐵大地色與草莓淺粉交織的夢幻漸層 */
+            background: linear-gradient(-45deg, #faf0e6, #fff0f5, #fdf5e6, #ffe4e1);
+            background-size: 400% 400%;
+            animation: dreamySky 15s ease infinite;
+        }
+
+        /* 漸層流動動畫 */
+        @keyframes dreamySky {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+
         .lobby-header {
             text-align: center;
             padding: 40px 20px 20px 20px;
@@ -475,23 +495,28 @@
         }
 
         .room-card {
-            background: white;
+            /* 👇 替換這兩行，讓卡片有一點點透出背景的漸層色 👇 */
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            /* 👆 ------------------------------------------ 👆 */
+            
             border-radius: 15px;
             padding: 25px 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
             text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: center;
             min-height: 150px;
-            border: 2px solid transparent;
+            border: 2px solid white; /* 加上白邊會很精緻 */
         }
 
         .room-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95); /* 滑鼠游標移過去時變亮 */
             border-color: #ff9a9e;
         }
 
