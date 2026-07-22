@@ -1138,17 +1138,20 @@
         });
 
         document.getElementById('import-btn').addEventListener('click', () => {
-            const importedStr = prompt("📥 請貼上您從電腦傳來的「行程代碼」：\n\n(⚠️ 警告：這將會覆蓋當前裝置上的所有行程！)");
+            const importedStr = prompt("📥 請貼上您從電腦傳來的「行程代碼」：\n\n(⚠️ 警告：這將會覆蓋 Firebase 雲端上的所有行程，所有人將同步更新！)");
             
             if (importedStr && importedStr.trim().startsWith("{")) {
                 try {
                     const parsedData = JSON.parse(importedStr);
-                    // 覆蓋本地資料
-                    localStorage.setItem('myMapItinerary', JSON.stringify(parsedData));
-                    alert("✅ 行程匯入成功！網頁即將重新載入。");
-                    location.reload(); // 重新載入網頁以套用新資料
+                    // 1. 將舊有的資料合併到最新的資料結構中
+                    itineraryData = { ...defaultData, ...parsedData };
+                    
+                    // 2. 直接推送到 Firebase 雲端！(雲端監聽器會自動觸發所有人更新畫面)
+                    saveData();
+                    
+                    alert("✅ 行程成功匯入並同步至雲端！所有裝置已即時更新。");
                 } catch (e) {
-                    alert("❌ 匯入失敗，代碼格式錯誤！請確保您複製了完整的字串。");
+                    alert("❌ 匯入失敗，代碼格式錯誤！請確保您複製了完整的 JSON 字串。");
                 }
             } else if (importedStr) {
                 alert("❌ 無效的代碼，請確認複製的內容是否正確。");
