@@ -14,7 +14,6 @@
             overflow: hidden; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        /* 🌟 終極鎖定 1：強制鎖死網頁底層，不允許任何水平偏移與邊緣回彈 */
         html {
             overflow: hidden !important;
             width: 100vw !important;
@@ -564,6 +563,10 @@
     <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     
+    <!-- 👇 新增 Firebase 雲端套件 👇 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
     <script>
         // ==========================================
         // 核心變數與地圖初始化
@@ -573,14 +576,31 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        const savedData = localStorage.getItem('myMapItinerary');
+        // 👇 新增 Firebase 初始化設定 👇
+        const firebaseConfig = {
+            apiKey: "AIzaSyCLuT5-W8qfvksBdry7wZDOZY88EhBW-hQ",
+            authDomain: "travel-b400f.firebaseapp.com",
+            databaseURL: "https://travel-b400f-default-rtdb.firebaseio.com",
+            projectId: "travel-b400f",
+            storageBucket: "travel-b400f.firebasestorage.app",
+            messagingSenderId: "613231559373",
+            appId: "1:613231559373:web:feb0e1e4eeb9d65f445f84",
+            measurementId: "G-W7W1RJS197"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
         const defaultData = { 
             shoppingList: [], 
             stagingFood_osaka: [], stagingFood_kyoto: [], stagingFood_nara: [], stagingFood_other: [], 
             stagingAttraction_osaka: [], stagingAttraction_kyoto: [], stagingAttraction_nara: [], stagingAttraction_other: [], 
             day1: [], day2: [], day3: [], day4: [], day5: [], day6: [], day7: [] 
         };
-        const itineraryData = savedData ? { ...defaultData, ...JSON.parse(savedData) } : defaultData;
+        // 先宣告一個全域變數，稍後由雲端資料覆寫
+        let itineraryData = { ...defaultData };
         
         // 兼容舊資料轉換 (保留之前存的美食與景點，並自動歸類到"其他")
         if (itineraryData.stagingFood) { itineraryData.stagingFood_other = (itineraryData.stagingFood_other || []).concat(itineraryData.stagingFood); delete itineraryData.stagingFood; }
@@ -603,7 +623,10 @@
         const searchStatus = document.getElementById('search-status');
         const itineraryList = document.getElementById('itinerary-list');
 
-        function saveData() { localStorage.setItem('myMapItinerary', JSON.stringify(itineraryData)); }
+        function saveData() { 
+            // 將資料直接推送到 Firebase 的 'sharedItinerary' 節點
+            db.ref('sharedItinerary').set(itineraryData); 
+        }
 
         let currentEditingIndex = null; 
         let currentEditingList = null; 
@@ -1345,10 +1368,30 @@
         });
 
 
-        // 網頁初始載入時，記得呼叫購物清單的渲染
-        renderShoppingList();
-        renderStagingArea();
-        renderMapAndList();
+       db.ref('sharedItinerary').on('value', (snapshot) => {
+            const data = snapshot.val();
+            
+            if (data) {
+                // 處理舊資料相容性
+                if (data.stagingFood) { data.stagingFood_other = (data.stagingFood_other || []).concat(data.stagingFood); delete data.stagingFood; }
+                if (data.stagingAttraction && Array.isArray(data.stagingAttraction)) { 
+                    data.stagingAttraction_other = (data.stagingAttraction_other || []).concat(data.stagingAttraction); 
+                    delete data.stagingAttraction; 
+                }
+                
+                // 將雲端資料同步到本地變數
+                itineraryData = { ...defaultData, ...data }; 
+                
+                // 自動重新渲染畫面
+                renderShoppingList();
+                renderStagingArea();
+                renderMapAndList();
+            } else {
+                // 如果雲端完全沒資料(第一次使用)，就把預設的空資料推上去
+                saveData();
+            }
+        });
+
     </script>
 </body>
 </html>
