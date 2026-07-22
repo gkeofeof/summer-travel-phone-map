@@ -395,167 +395,328 @@
             transition: none !important;
         }
 
+        /* --- 行程大廳樣式 --- */
+        .lobby-header {
+            text-align: center;
+            padding: 40px 20px 20px 20px;
+        }
+
+        .lobby-header h1 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .room-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 150px;
+            border: 2px solid transparent;
+        }
+
+        .room-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #ff9a9e;
+        }
+
+        .room-card h3 {
+            margin: 0 0 10px 0;
+            color: #444;
+        }
+
+        .room-card .status {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 10px;
+        }
+
+        .room-card .date {
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-top: auto;
+        }
+
+        /* ➕ 新增按鈕專屬樣式 */
+        .create-new {
+            background: #f8f9fa;
+            border: 2px dashed #ccc;
+            box-shadow: none;
+        }
+
+        .create-new:hover {
+            background: #fff0f0;
+            border: 2px dashed #ff9a9e;
+        }
+
+        .plus-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        /* --- 👥 在線旅伴樣式 --- */
+        .online-users-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 15px 15px 15px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .online-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .avatar-list {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            animation: popIn 0.3s ease-out;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .user-avatar::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 8px;
+            height: 8px;
+            background-color: #4CAF50;
+            border: 1.5px solid white;
+            border-radius: 50%;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
     </style>
 </head>
 <body>
-    <div id="top-nav">
-        <div class="nav-item" style="font-weight: bold; margin-right: 10px;">📌 快捷工具</div>
-        <!-- 下方可以自由替換成你常用的網站連結 -->
-        <a href="https://transit.yahoo.co.jp/" target="_blank" class="nav-item">🚆 Yahoo! 乘車換乘</a>
-        <a href="https://www.google.com/maps" target="_blank" class="nav-item">🗺️ Google Maps</a>
-        <a href="https://translate.google.com/?hl=zh-TW" target="_blank" class="nav-item">🈺 Google 翻譯</a>
-        <a href="https://tenki.jp/" target="_blank" class="nav-item">⛅ 日本天氣預報</a>
-        <a href="https://www.xe.com/zh-HK/currencyconverter/convert/?Amount=1&From=JPY&To=TWD" target="_blank" class="nav-item">💴 匯率換算</a>
-    </div>
-    
-    <!-- 🌟 新增：手機版專用的浮動開關按鈕 (預設在電腦版隱藏) -->
-        <button id="mobile-left-btn" class="mobile-toggle-btn" style="left: 10px;">🛍️ 暫存區</button>
-        <button id="mobile-right-btn" class="mobile-toggle-btn" style="right: 10px;">📅 行程表</button>
-
-    <!-- 編輯資訊彈窗 -->
-    <div id="item-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 id="modal-title">檢視/編輯 資訊</h3>
-            <div class="form-group">
-                <label style="font-size: 13px; font-weight: bold;">📝 必點菜色 / 備註：</label>
-                <textarea id="modal-notes" rows="3" placeholder="例如：必點白菜滷、記得提早去排隊..."></textarea>
+    <div id="lobby-container" style="display: none;">
+        <div class="lobby-header">
+            <h1>🌍 探索行程大廳</h1>
+            <p>點擊卡片查看大家分享的行程，或建立專屬於你的旅程！</p>
+        </div>
+        
+        <div id="room-list" class="room-grid">
+            <!-- ➕ 新增行程按鈕卡片 -->
+            <div class="room-card create-new" id="create-room-btn">
+                <div class="plus-icon">➕</div>
+                <h3>建立新行程</h3>
             </div>
-            <div class="form-group">
-                <label style="font-size: 13px; font-weight: bold;">🔗 參考連結：</label>
-                <input type="text" id="modal-link" placeholder="例如：Google Maps 連結">
-            </div>
-            <div class="form-group">
-                <label style="font-size: 13px; font-weight: bold;">💰 預計花費 (日圓)：</label>
-                <input type="number" id="modal-cost" placeholder="例如：1500">
-            </div>
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button id="modal-save-btn" style="flex: 1; background-color: #28a745;">儲存</button>
-                <button id="modal-close-btn" style="flex: 1; background-color: #6c757d;">關閉</button>
-            </div>
+            <!-- 從 Firebase 抓下來的行程會動態塞在這裡 -->
         </div>
     </div>
 
+    <div id="planner-container" style="display: none;">
 
-    <div id="left-sidebar">
-        <h2>🛍️ 必買清單與暫存</h2>
+        <h1 class="main-title">夏日之旅・ふたりの夏</h1>
         
-        <!-- 全新：藥妝與便利商店清單區塊 -->
-        <div class="staging-area-container" style="background-color: #fdfdfe; border: 2px dashed #e83e8c; padding: 10px; border-radius: 5px;">
-            <h4 style="margin: 0 0 10px 0; color: #e83e8c;">🛒 店家必買清單</h4>
-            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                <input type="text" id="new-store-input" placeholder="新增店家(如:大國藥妝)" style="flex:1;">
-                <button id="add-store-btn" style="background-color: #e83e8c; width: auto;">新增</button>
-            </div>
-            <!-- 存放各店家的容器 -->
-            <div id="shopping-stores-container"></div>
-        </div>
-
-        <hr style="width: 100%; border: 0.5px solid #ccc;">
-
-        <!-- 景點暫定區 (支援地區分類) -->
-        <div class="staging-area-container" style="background-color: #fdfdfe; border: 2px dashed #28a745; padding: 10px; border-radius: 5px;">
-            <h4 style="margin: 0 0 5px 0; color: #28a745;">📷 景點暫定區</h4>
-            
-            <div class="region-folder-attraction" onclick="toggleFolder('attraction-osaka-list', this)">📂 大阪 (0) <span style="float:right; font-size:10px;">▼</span></div>
-            <ul id="attraction-osaka-list" class="sortable-list" style="display: none; padding-top: 5px; min-height: 10px;"></ul>
-            
-            <div class="region-folder-attraction" onclick="toggleFolder('attraction-kyoto-list', this)">📂 京都 (0) <span style="float:right; font-size:10px;">▼</span></div>
-            <ul id="attraction-kyoto-list" class="sortable-list" style="display: none; padding-top: 5px; min-height: 10px;"></ul>
-            
-            <div class="region-folder-attraction" onclick="toggleFolder('attraction-nara-list', this)">📂 奈良 (0) <span style="float:right; font-size:10px;">▼</span></div>
-            <ul id="attraction-nara-list" class="sortable-list" style="display: none; padding-top: 5px; min-height: 10px;"></ul>
-            
-            <div class="region-folder-attraction" onclick="toggleFolder('attraction-other-list', this)">📂 其他 (0) <span style="float:right; font-size:10px;">▼</span></div>
-            <ul id="attraction-other-list" class="sortable-list" style="display: none; padding-top: 5px; min-height: 10px;"></ul>
+        <!-- 我們前一步剛新增的：在線旅伴區塊 -->
+        <div id="online-users-container" class="online-users-bar">
+            <span class="online-label">👥 在線旅伴：</span>
+            <div id="avatar-list" class="avatar-list"></div>
         </div>
         
-        <!-- 美食暫定區 (支援地區分類) -->
-        <div class="staging-area-container" style="background-color: #fdfdfe; border: 2px dashed #17a2b8; padding: 10px; border-radius: 5px;">
-            <h4 style="margin: 0 0 5px 0; color: #17a2b8;">🍽️ 美食暫定區</h4>
-            
-            <div class="region-folder" onclick="toggleFolder('food-osaka-list', this)">📂 大阪 (0) <span style="float:right; font-size:10px;">▼</span></div>
-            <ul id="food-osaka-list" class="sortable-list" style="display: none; padding-top: 5px; min-height: 10px;"></ul>
-            
-            <div class="region-folder" onclick="toggleFolder('food-kyoto-list', this)">📂 京都 (0) <span style="float:right; font-size:10px;">▼</span></div>
-            <ul id="food-kyoto-list" class="sortable-list" style="display: none; padding-top: 5px; min-height: 10px;"></ul>
-            
-            <div class="region-folder" onclick="toggleFolder('food-nara-list', this)">📂 奈良 (0) <span style="float:right; font-size:10px;">▼</span></div>
-            <ul id="food-nara-list" class="sortable-list" style="display: none; padding-top: 5px; min-height: 10px;"></ul>
-            
-            <div class="region-folder" onclick="toggleFolder('food-other-list', this)">📂 其他 (0) <span style="float:right; font-size:10px;">▼</span></div>
-            <ul id="food-other-list" class="sortable-list" style="display: none; padding-top: 5px; min-height: 10px;"></ul>
+        <div id="top-nav">
+            <div class="nav-item" style="font-weight: bold; margin-right: 10px;">📌 快捷工具</div>
+            <!-- 下方可以自由替換成你常用的網站連結 -->
+            <a href="https://transit.yahoo.co.jp/" target="_blank" class="nav-item">🚆 Yahoo! 乘車換乘</a>
+            <a href="https://www.google.com/maps" target="_blank" class="nav-item">🗺️ Google Maps</a>
+            <a href="https://translate.google.com/?hl=zh-TW" target="_blank" class="nav-item">🈺 Google 翻譯</a>
+            <a href="https://tenki.jp/" target="_blank" class="nav-item">⛅ 日本天氣預報</a>
+            <a href="https://www.xe.com/zh-HK/currencyconverter/convert/?Amount=1&From=JPY&To=TWD" target="_blank" class="nav-item">💴 匯率換算</a>
         </div>
-    </div>
+        
+        <!-- 🌟 新增：手機版專用的浮動開關按鈕 (預設在電腦版隱藏) -->
+            <button id="mobile-left-btn" class="mobile-toggle-btn" style="left: 10px;">🛍️ 暫存區</button>
+            <button id="mobile-right-btn" class="mobile-toggle-btn" style="right: 10px;">📅 行程表</button>
 
-    <!-- 左側地圖 -->
-    <div id="map"></div>
+        <!-- 編輯資訊彈窗 -->
+        <div id="item-modal" class="modal-overlay">
+            <div class="modal-content">
+                <h3 id="modal-title">檢視/編輯 資訊</h3>
+                <div class="form-group">
+                    <label style="font-size: 13px; font-weight: bold;">📝 必點菜色 / 備註：</label>
+                    <textarea id="modal-notes" rows="3" placeholder="例如：必點白菜滷、記得提早去排隊..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 13px; font-weight: bold;">🔗 參考連結：</label>
+                    <input type="text" id="modal-link" placeholder="例如：Google Maps 連結">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 13px; font-weight: bold;">💰 預計花費 (日圓)：</label>
+                    <input type="number" id="modal-cost" placeholder="例如：1500">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button id="modal-save-btn" style="flex: 1; background-color: #28a745;">儲存</button>
+                    <button id="modal-close-btn" style="flex: 1; background-color: #6c757d;">關閉</button>
+                </div>
+            </div>
+        </div>
 
-    <!-- 右側選單 -->
-    <div id="sidebar">
-        <h2>夏日之旅・ふたりの夏</h2>
 
-        <!-- 🌟 新增：手機同步用的匯出匯入按鈕 -->
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <button id="export-btn" style="flex: 1; background-color: #ffc107; color: #333; font-weight: bold;">📤 匯出資料 (傳至手機)</button>
-            <button id="import-btn" style="flex: 1; background-color: #6c757d; color: white; font-weight: bold;">📥 匯入資料 (手機接收)</button>
+        <div id="left-sidebar">
+            <h2>🛍️ 必買清單與暫存</h2>
+            
+            <!-- 全新：藥妝與便利商店清單區塊 -->
+            <div class="staging-area-container" style="background-color: #fdfdfe; border: 2px dashed #e83e8c; padding: 10px; border-radius: 5px;">
+                <h4 style="margin: 0 0 10px 0; color: #e83e8c;">🛒 店家必買清單</h4>
+                <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                    <input type="text" id="new-store-input" placeholder="新增店家(如:大國藥妝)" style="flex:1;">
+                    <button id="add-store-btn" style="background-color: #e83e8c; width: auto;">新增</button>
+                </div>
+                <!-- 存放各店家的容器 -->
+                <div id="shopping-stores-container"></div>
+            </div>
+
+            <hr style="width: 100%; border: 0.5px solid #ccc;">
+
+            <!-- 景點暫定區 (支援地區分類) -->
+            <div class="staging-area-container" style="background-color: #fdfdfe; border: 2px dashed #28a745; padding: 10px; border-radius: 5px;">
+                <h4 style="margin: 0 0 5px 0; color: #28a745;">📷 景點暫定區</h4>
+                
+                <div class="region-folder-attraction" onclick="toggleFolder('attraction-osaka-list', this)">📂 大阪 (0) <span style="float:right; font-size:10px;">▼</span></div>
+                <ul id="attraction-osaka-list" class="sortable-list" style="display: none; padding-top: 5px; min-height: 10px;"></ul>
+                
+                <div class="region-folder-attraction" onclick="toggleFolder('attraction-kyoto-list', this)">📂 京都 (0) <span style="float:right; font-size:10px;">▼</span></div>
+                <ul id="attraction-kyoto-list" class="sortable-list" style="display: none; padding-top: 5px; min-height: 10px;"></ul>
+                
+                <div class="region-folder-attraction" onclick="toggleFolder('attraction-nara-list', this)">📂 奈良 (0) <span style="float:right; font-size:10px;">▼</span></div>
+                <ul id="attraction-nara-list" class="sortable-list" style="display: none; padding-top: 5px; min-height: 10px;"></ul>
+                
+                <div class="region-folder-attraction" onclick="toggleFolder('attraction-other-list', this)">📂 其他 (0) <span style="float:right; font-size:10px;">▼</span></div>
+                <ul id="attraction-other-list" class="sortable-list" style="display: none; padding-top: 5px; min-height: 10px;"></ul>
+            </div>
+            
+            <!-- 美食暫定區 (支援地區分類) -->
+            <div class="staging-area-container" style="background-color: #fdfdfe; border: 2px dashed #17a2b8; padding: 10px; border-radius: 5px;">
+                <h4 style="margin: 0 0 5px 0; color: #17a2b8;">🍽️ 美食暫定區</h4>
+                
+                <div class="region-folder" onclick="toggleFolder('food-osaka-list', this)">📂 大阪 (0) <span style="float:right; font-size:10px;">▼</span></div>
+                <ul id="food-osaka-list" class="sortable-list" style="display: none; padding-top: 5px; min-height: 10px;"></ul>
+                
+                <div class="region-folder" onclick="toggleFolder('food-kyoto-list', this)">📂 京都 (0) <span style="float:right; font-size:10px;">▼</span></div>
+                <ul id="food-kyoto-list" class="sortable-list" style="display: none; padding-top: 5px; min-height: 10px;"></ul>
+                
+                <div class="region-folder" onclick="toggleFolder('food-nara-list', this)">📂 奈良 (0) <span style="float:right; font-size:10px;">▼</span></div>
+                <ul id="food-nara-list" class="sortable-list" style="display: none; padding-top: 5px; min-height: 10px;"></ul>
+                
+                <div class="region-folder" onclick="toggleFolder('food-other-list', this)">📂 其他 (0) <span style="float:right; font-size:10px;">▼</span></div>
+                <ul id="food-other-list" class="sortable-list" style="display: none; padding-top: 5px; min-height: 10px;"></ul>
+            </div>
         </div>
 
         
-        <div class="form-group">
-            <label for="day-select">選擇天數：</label>
-            <select id="day-select">
-                <option value="day1">第一天</option>
-                <option value="day2">第二天</option>
-                <option value="day3">第三天</option>
-                <option value="day4">第四天</option>
-                <option value="day5">第五天</option>
-                <option value="day6">第六天</option>
-                <option value="day7">第七天</option>
-            </select>
-        </div>
+        <!-- 左側地圖 -->
+        <div id="map"></div>
 
-        <hr style="width: 100%; border: 0.5px solid #ccc;">
+        <!-- 右側選單 -->
+        <div id="sidebar">
+            <h2>夏日之旅・ふたりの夏</h2>
 
-        <div class="form-group">
-            <label>🔍 搜尋地點 (自動定位)：</label>
-            <div style="display: flex; gap: 5px;">
-                <input type="text" id="search-input" placeholder="例如：春日大社" style="flex: 1;">
-                <button id="search-btn" style="width: auto;">搜尋</button>
+            <!-- 🌟 新增：手機同步用的匯出匯入按鈕 -->
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button id="export-btn" style="flex: 1; background-color: #ffc107; color: #333; font-weight: bold;">📤 匯出資料 (傳至手機)</button>
+                <button id="import-btn" style="flex: 1; background-color: #6c757d; color: white; font-weight: bold;">📥 匯入資料 (手機接收)</button>
             </div>
-            <small id="search-status" style="color: #666;"></small>
-        </div>
 
-        <div id="add-form" style="background: #e9ecef; padding: 15px; border-radius: 5px;">
+            
             <div class="form-group">
-                <label>選擇座標 (點擊地圖或搜尋)：</label>
-                <input type="text" id="coord-input" placeholder="請先點擊地圖或使用搜尋" readonly>
-            </div>
-            <div class="form-group">
-                <label>項目名稱：</label>
-                <input type="text" id="name-input" placeholder="例如：春日大社">
-            </div>
-            <div class="form-group">
-                <label>類別 (加入暫存時會依座標自動判斷地區)：</label>
-                <select id="type-select" style="width: 100%;">
-                    <option value="景點">玩 (景點)</option>
-                    <option value="美食">吃 (綜合美食)</option>
-                    <option value="拉麵">吃 (拉麵🍜)</option>
-                    <option value="燒肉">吃 (燒肉🥩)</option>
-                    <option value="洋食">吃 (洋食🍳)</option>
-                    <option value="住宿">住 (住宿)</option>
+                <label for="day-select">選擇天數：</label>
+                <select id="day-select">
+                    <option value="day1">第一天</option>
+                    <option value="day2">第二天</option>
+                    <option value="day3">第三天</option>
+                    <option value="day4">第四天</option>
+                    <option value="day5">第五天</option>
+                    <option value="day6">第六天</option>
+                    <option value="day7">第七天</option>
                 </select>
             </div>
-            
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button id="add-btn" style="flex: 1; padding: 8px;">新增至行程</button>
-                <button id="btn-add-staging" style="flex: 1; padding: 8px; background-color: #17a2b8; color: white; border: none; border-radius: 4px;">加入暫存區(自動分類)</button>
+
+            <hr style="width: 100%; border: 0.5px solid #ccc;">
+
+            <div class="form-group">
+                <label>🔍 搜尋地點 (自動定位)：</label>
+                <div style="display: flex; gap: 5px;">
+                    <input type="text" id="search-input" placeholder="例如：春日大社" style="flex: 1;">
+                    <button id="search-btn" style="width: auto;">搜尋</button>
+                </div>
+                <small id="search-status" style="color: #666;"></small>
             </div>
-        </div>
 
-        <hr style="width: 100%; border: 0.5px solid #ccc;">
+            <div id="add-form" style="background: #e9ecef; padding: 15px; border-radius: 5px;">
+                <div class="form-group">
+                    <label>選擇座標 (點擊地圖或搜尋)：</label>
+                    <input type="text" id="coord-input" placeholder="請先點擊地圖或使用搜尋" readonly>
+                </div>
+                <div class="form-group">
+                    <label>項目名稱：</label>
+                    <input type="text" id="name-input" placeholder="例如：春日大社">
+                </div>
+                <div class="form-group">
+                    <label>類別 (加入暫存時會依座標自動判斷地區)：</label>
+                    <select id="type-select" style="width: 100%;">
+                        <option value="景點">玩 (景點)</option>
+                        <option value="美食">吃 (綜合美食)</option>
+                        <option value="拉麵">吃 (拉麵🍜)</option>
+                        <option value="燒肉">吃 (燒肉🥩)</option>
+                        <option value="洋食">吃 (洋食🍳)</option>
+                        <option value="住宿">住 (住宿)</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button id="add-btn" style="flex: 1; padding: 8px;">新增至行程</button>
+                    <button id="btn-add-staging" style="flex: 1; padding: 8px; background-color: #17a2b8; color: white; border: none; border-radius: 4px;">加入暫存區(自動分類)</button>
+                </div>
+            </div>
 
-        <h3>當天行程清單 (可上下拖曳排序)</h3>
-        <ul id="itinerary-list" class="sortable-list"></ul>
+            <hr style="width: 100%; border: 0.5px solid #ccc;">
+
+            <h3>當天行程清單 (可上下拖曳排序)</h3>
+            <ul id="itinerary-list" class="sortable-list"></ul>
+        </div>    
     </div>
 
     <!-- 引入 JS 資源 -->
@@ -592,22 +753,189 @@
             firebase.initializeApp(firebaseConfig);
         }
         const db = firebase.database();
-
+         
         const defaultData = { 
             shoppingList: [], 
             stagingFood_osaka: [], stagingFood_kyoto: [], stagingFood_nara: [], stagingFood_other: [], 
             stagingAttraction_osaka: [], stagingAttraction_kyoto: [], stagingAttraction_nara: [], stagingAttraction_other: [], 
             day1: [], day2: [], day3: [], day4: [], day5: [], day6: [], day7: [] 
         };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomId = urlParams.get('room');
+        let currentRoomPassword = ""; 
+
+        const lobbyContainer = document.getElementById('lobby-container');
+        const plannerContainer = document.getElementById('planner-container');
+
+        if (!roomId) {
+            // ==========================================
+            // 進入模式 A：顯示行程大廳
+            // ==========================================
+            lobbyContainer.style.display = 'block';
+            plannerContainer.style.display = 'none';
+
+            // 1. 綁定「➕ 建立新行程」按鈕
+            document.getElementById('create-room-btn').addEventListener('click', () => {
+                const roomTitle = prompt("📝 請輸入新行程的名稱 (例如：沖繩家族旅行)：") || "未命名行程";
+                const pwd = prompt("🔒 請為此行程設定「編輯密碼」\n（若希望所有人都能自由編輯，請直接留白按確定）：") || "";
+                
+                const newRoomId = Math.random().toString(36).substring(2, 10);
+                
+                // 寫入 Firebase (加上 title 跟 created_at)
+                db.ref(`itineraries/${newRoomId}`).set({
+                    title: roomTitle,
+                    password: pwd,
+                    hasPassword: (pwd !== ""), // 布林值，用來在大廳顯示鎖頭圖示
+                    data: defaultData,         // 載入預設空白卡片
+                    created_at: Date.now(),
+                    auth_pwd: pwd
+                }).then(() => {
+                    // 建立成功後，自動跳轉進入該房間
+                    window.location.search = `?room=${newRoomId}`;
+                });
+            });
+
+            // 2. 讀取 Firebase 上的所有行程，生成大廳卡片
+            db.ref('itineraries').once('value').then(snapshot => {
+                const rooms = snapshot.val();
+                if (rooms) {
+                    const roomList = document.getElementById('room-list');
+                    const createBtn = document.getElementById('create-room-btn');
+                    
+                    // 迴圈跑過每個資料庫裡的房間
+                    Object.keys(rooms).forEach(key => {
+                        const room = rooms[key];
+                        
+                        // 創建卡片 DOM
+                        const card = document.createElement('div');
+                        card.className = 'room-card';
+                        
+                        // 判斷狀態與日期
+                        const statusStr = room.hasPassword ? '🔒 需密碼編輯' : '🔓 公開共編';
+                        const dateStr = new Date(room.created_at || Date.now()).toLocaleDateString();
+                        
+                        card.innerHTML = `
+                            <h3>${room.title || '未命名行程'}</h3>
+                            <div class="status">${statusStr}</div>
+                            <div class="date">建立於：${dateStr}</div>
+                        `;
+                        
+                        // 點擊卡片時，進入該房間網址
+                        card.addEventListener('click', () => {
+                            window.location.search = `?room=${key}`;
+                        });
+                        
+                        // 將卡片插入到「建立新行程」按鈕的前面
+                        roomList.insertBefore(card, createBtn);
+                    });
+                }
+            });
+
+        } else {
+            // ==========================================
+            // 進入模式 B：顯示行程編輯器 (Planner)
+            // ==========================================
+            lobbyContainer.style.display = 'none';
+            plannerContainer.style.display = 'block';
+
+            setTimeout(() => { map.invalidateSize(); }, 300);
+            
+            const roomRef = db.ref(`itineraries/${roomId}`);
+            
+            roomRef.once('value').then(snapshot => {
+                if (!snapshot.exists()) {
+                    alert("❌ 找不到此行程，可能是網址錯誤！將為您導回大廳。");
+                    window.location.search = ""; 
+                    return;
+                }
+                
+                const dbData = snapshot.val();
+                
+                // 替換頁面標題為使用者自訂的行程名稱
+                const titleEl = document.querySelector('.main-title');
+                if (titleEl && dbData.title) {
+                    titleEl.textContent = dbData.title;
+                }
+                
+                // 若行程有加密，要求輸入密碼
+                if (dbData.hasPassword) {
+                    currentRoomPassword = prompt("🔒 此行程已加密，請輸入「編輯密碼」：\n(若取消或輸入錯誤，您將只能檢視無法修改)") || "";
+                }
+
+                // 綁定資料變更監聽器
+                roomRef.child('data').on('value', (snap) => {
+                    const data = snap.val();
+                    if (data) {
+                        itineraryData = { ...defaultData, ...data };
+
+                        // 兼容舊資料轉換 (保留之前存的美食與景點，並自動歸類到"其他")
+                        if (itineraryData.stagingFood) { itineraryData.stagingFood_other = (itineraryData.stagingFood_other || []).concat(itineraryData.stagingFood); delete itineraryData.stagingFood; }
+                        if (itineraryData.stagingAttraction && Array.isArray(itineraryData.stagingAttraction)) { 
+                            itineraryData.stagingAttraction_other = (itineraryData.stagingAttraction_other || []).concat(itineraryData.stagingAttraction); 
+                            delete itineraryData.stagingAttraction; 
+                        }
+                        renderShoppingList();
+                        renderStagingArea();
+                        renderMapAndList();
+                    }
+                });
+            });
+        }
+
         // 先宣告一個全域變數，稍後由雲端資料覆寫
         let itineraryData = { ...defaultData };
-        
-        // 兼容舊資料轉換 (保留之前存的美食與景點，並自動歸類到"其他")
-        if (itineraryData.stagingFood) { itineraryData.stagingFood_other = (itineraryData.stagingFood_other || []).concat(itineraryData.stagingFood); delete itineraryData.stagingFood; }
-        if (itineraryData.stagingAttraction && Array.isArray(itineraryData.stagingAttraction)) { 
-            itineraryData.stagingAttraction_other = (itineraryData.stagingAttraction_other || []).concat(itineraryData.stagingAttraction); 
-            delete itineraryData.stagingAttraction; 
+
+        // ==========================================
+        // 👥 旅伴在線狀態管理 (Presence System) - 支援多房間
+        // ==========================================
+        if (roomId) {
+            const avatars = ['🐱', '🐶', '🐰', '🦊', '🐼', '🐨', '🐻', '🐯', '🦁', '🐸'];
+            const bgColors = ['#FFD1DC', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF', '#E8AEFF'];
+
+            const myEmoji = avatars[Math.floor(Math.random() * avatars.length)];
+            const myBgColor = bgColors[Math.floor(Math.random() * bgColors.length)];
+            const mySessionId = 'user_' + Math.random().toString(36).substring(2, 9);
+            
+            // 將在線狀態綁定在當前房間下
+            const userRef = db.ref(`presence/${roomId}/${mySessionId}`);
+            const connectedRef = db.ref('.info/connected');
+
+            connectedRef.on('value', (snap) => {
+                if (snap.val() === true) {
+                    userRef.onDisconnect().remove(); // 離線時自動刪除頭像
+                    userRef.set({
+                        emoji: myEmoji,
+                        bgColor: myBgColor,
+                        joinedAt: Date.now()
+                    });
+                }
+            });
+
+            // 監聽當前房間的在線人數
+            db.ref(`presence/${roomId}`).on('value', (snapshot) => {
+                const users = snapshot.val() || {};
+                const avatarListEl = document.getElementById('avatar-list');
+                if(avatarListEl) avatarListEl.innerHTML = ''; 
+
+                Object.keys(users).forEach(key => {
+                    const user = users[key];
+                    const avatarEl = document.createElement('div');
+                    avatarEl.className = 'user-avatar';
+                    avatarEl.style.backgroundColor = user.bgColor;
+                    avatarEl.textContent = user.emoji;
+                    
+                    if (key === mySessionId) {
+                        avatarEl.title = "你（當前裝置）";
+                        avatarEl.style.border = "2px solid #FF9800"; 
+                    } else {
+                        avatarEl.title = "在線旅伴";
+                    }
+                    if(avatarListEl) avatarListEl.appendChild(avatarEl);
+                });
+            });
         }
+        
 
         let currentMarkers = [];
         let routingControls = []; 
@@ -623,9 +951,21 @@
         const searchStatus = document.getElementById('search-status');
         const itineraryList = document.getElementById('itinerary-list');
 
-        function saveData() { 
-            // 將資料直接推送到 Firebase 的 'sharedItinerary' 節點
-            db.ref('sharedItinerary').set(itineraryData); 
+        function saveData() {
+            if (!roomId) return; // 不在房間內就不執行
+            
+            const roomRef = db.ref(`itineraries/${roomId}`);
+            
+            // 我們只更新 'data' 節點，同時必須在根層級提供 auth_pwd 給 Firebase Rules 檢查
+            roomRef.update({
+                data: itineraryData,
+                auth_pwd: currentRoomPassword 
+            }).catch(error => {
+                console.error("儲存失敗:", error);
+                alert("⛔ 儲存失敗！您輸入的編輯密碼錯誤，或者您沒有修改權限。");
+                // 若儲存失敗，重新載入畫面，回溯到雲端的真實狀態
+                location.reload(); 
+            });
         }
 
         let currentEditingIndex = null; 
@@ -1367,31 +1707,6 @@
                 saveData(); 
                 renderShoppingList();
                 input.value = '';
-            }
-        });
-
-
-       db.ref('sharedItinerary').on('value', (snapshot) => {
-            const data = snapshot.val();
-            
-            if (data) {
-                // 處理舊資料相容性
-                if (data.stagingFood) { data.stagingFood_other = (data.stagingFood_other || []).concat(data.stagingFood); delete data.stagingFood; }
-                if (data.stagingAttraction && Array.isArray(data.stagingAttraction)) { 
-                    data.stagingAttraction_other = (data.stagingAttraction_other || []).concat(data.stagingAttraction); 
-                    delete data.stagingAttraction; 
-                }
-                
-                // 將雲端資料同步到本地變數
-                itineraryData = { ...defaultData, ...data }; 
-                
-                // 自動重新渲染畫面
-                renderShoppingList();
-                renderStagingArea();
-                renderMapAndList();
-            } else {
-                // 如果雲端完全沒資料(第一次使用)，就把預設的空資料推上去
-                saveData();
             }
         });
 
