@@ -1313,26 +1313,21 @@
                 delayOnTouchOnly: true,
                 forceFallback: true,
                 fallbackOnBody: true,
-                
-                // 🌟 新增：邊緣自動滾動設定 (往上/往下拖曳時，選單會自動捲動)
                 scroll: true,
-                scrollSensitivity: 80, // 距離螢幕上下邊緣 80px 時開始滾動 (手機上建議設大一點)
-                scrollSpeed: 15,       // 滾動的速度
+                scrollSensitivity: 80,
+                scrollSpeed: 15,
 
                 // 抓起卡片的瞬間
                 onStart: function(evt) {
                     document.body.classList.add('is-dragging');
                     
-                    // 🌟 新增：手機版手指追蹤切換邏輯
                     if (window.innerWidth <= 768) {
-                        // 判斷一開始是抓左邊還是右邊的卡片，給予初始面板狀態
                         if (evt.from.closest('#left-sidebar')) {
                             document.body.classList.add('drag-left');
                         } else {
                             document.body.classList.add('drag-right');
                         }
                         
-                        // 監聽手指移動，一旦跨越螢幕中線，立刻切換面板！
                         document.dragMoveHandler = function(e) {
                             let clientX = e.touches ? e.touches[0].clientX : e.clientX;
                             if (clientX > window.innerWidth / 2) {
@@ -1343,13 +1338,12 @@
                                 document.body.classList.remove('drag-right');
                             }
                         };
-                        // 綁定追蹤事件
                         document.addEventListener('touchmove', document.dragMoveHandler, {passive: true});
                         document.addEventListener('mousemove', document.dragMoveHandler, {passive: true});
                     }
                 },
 
-                // 跨區塊拖曳放入時
+                // 🔄 跨區塊拖曳放入時：只處理「資料更新」，絕對不要在這裡重繪畫面！
                 onAdd: function (evt) {
                     const sourceArray = getArrayById(evt.from.id);
                     const targetArray = getArrayById(evt.to.id);
@@ -1358,17 +1352,14 @@
                         const draggedItem = sourceArray.splice(evt.oldIndex, 1)[0];
                         targetArray.splice(evt.newIndex, 0, draggedItem);
                         
+                        // 只存檔，移除原本的 removeChild 避免干擾套件
                         saveData();
-                        evt.item.parentNode.removeChild(evt.item); 
-                        
-                        renderStagingArea();
-                        renderMapAndList();
                     }
                 },
                 
-                // 放下卡片時
+                // 🏁 放下卡片時 (無論是跨區塊還是同區塊都會觸發)
                 onEnd: function(evt) {
-                    // 🌟 清除所有拖曳狀態與追蹤器，讓畫面恢復原狀
+                    // 1. 清除所有拖曳狀態與追蹤器
                     document.body.classList.remove('is-dragging', 'drag-left', 'drag-right');
                     if (document.dragMoveHandler) {
                         document.removeEventListener('touchmove', document.dragMoveHandler);
@@ -1376,15 +1367,21 @@
                         document.dragMoveHandler = null;
                     }
 
+                    // 2. 同區塊內的排序調整：處理資料
                     if (evt.from === evt.to) {
                         const dataArray = getArrayById(evt.to.id);
                         const item = dataArray.splice(evt.oldIndex, 1)[0];
                         dataArray.splice(evt.newIndex, 0, item);
                         
                         saveData(); 
-                        if(evt.to.id === 'itinerary-list') renderMapAndList();
-                        else renderStagingArea();
                     }
+
+                    // 3. 🌟 終極解法：讓事件迴圈稍微等一下 (50ms)
+                    // 等 SortableJS 把所有原生 DOM 動畫與清理做完後，我們再來重繪畫面！
+                    setTimeout(() => {
+                        renderStagingArea();
+                        renderMapAndList();
+                    }, 50);
                 }
             });
         }
