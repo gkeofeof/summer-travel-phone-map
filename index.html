@@ -549,6 +549,70 @@
             100% { transform: scale(1); }
         }
 
+        /* --- ✅ 完成事項清單樣式 --- */
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 5px;
+            border-bottom: 1px solid #f0e6e6;
+            gap: 10px;
+            transition: background-color 0.2s;
+        }
+        .todo-item:hover {
+            background-color: #fff0f5;
+        }
+        
+        /* 自訂方塊勾勾 */
+        .todo-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #5d4037;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: transparent; /* 預設隱藏勾勾 */
+            font-size: 14px;
+            font-weight: bold;
+            user-select: none;
+        }
+        
+        /* 打勾後的狀態 */
+        .todo-checkbox.checked {
+            background-color: #ff9a9e;
+            border-color: #ff9a9e;
+            color: white; /* 顯示勾勾 */
+        }
+        
+        .todo-text {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        /* 文字劃線狀態 */
+        .todo-item.done .todo-text {
+            text-decoration: line-through;
+            color: #aaa;
+        }
+        
+        .todo-delete-btn {
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px 6px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        .todo-item:hover .todo-delete-btn {
+            opacity: 1;
+        }
+
+
     </style>
 </head>
 <body>
@@ -611,6 +675,29 @@
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
                     <button id="modal-save-btn" style="flex: 1; background-color: #28a745;">儲存</button>
                     <button id="modal-close-btn" style="flex: 1; background-color: #6c757d;">關閉</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 🌟 新增：行前完成事項 彈窗 -->
+        <div id="todo-modal" class="modal-overlay">
+            <div class="modal-content" style="width: 350px; max-height: 80vh; background: #fffaf5;">
+                <!-- 右上角關閉按鈕 -->
+                <div style="text-align: right; margin-bottom: -10px;">
+                    <span id="todo-close-btn" style="cursor: pointer; font-size: 12px; color: #555;">✕ 關閉</span>
+                </div>
+                
+                <h3 style="margin-top: 0; color: #5d4037; border-bottom: 2px dashed #ff9a9e; padding-bottom: 8px;">✅ 行前完成事項</h3>
+                
+                <!-- 新增事項輸入區 -->
+                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                    <input type="text" id="todo-input" placeholder="例如：領日幣、買網卡..." style="flex: 1; border: 1px solid #d7ccc8;">
+                    <button id="todo-add-btn" style="background-color: #5d4037; color: white; padding: 6px 12px;">新增</button>
+                </div>
+
+                <!-- 待辦事項列表顯示區 -->
+                <div id="todo-list-container" style="overflow-y: auto; flex: 1; max-height: 300px; padding-right: 5px;">
+                    <!-- 項目會透過 JS 動態產生在這裡 -->
                 </div>
             </div>
         </div>
@@ -1807,6 +1894,101 @@
                 input.value = '';
             }
         });
+
+        // ✅ 行前完成事項 (To-Do List) 邏輯
+        const btnTodo = document.getElementById('btn-todo');
+        const todoModal = document.getElementById('todo-modal');
+        const todoCloseBtn = document.getElementById('todo-close-btn');
+        const todoAddBtn = document.getElementById('todo-add-btn');
+        const todoInput = document.getElementById('todo-input');
+        const todoListContainer = document.getElementById('todo-list-container');
+
+        // 打開視窗
+        if(btnTodo) {
+            btnTodo.addEventListener('click', (e) => {
+                e.preventDefault();
+                renderTodoList(); // 打開時刷新畫面
+                todoModal.style.display = 'flex';
+            });
+        }
+
+        // 關閉視窗
+        if(todoCloseBtn) {
+            todoCloseBtn.addEventListener('click', () => {
+                todoModal.style.display = 'none';
+            });
+        }
+
+        // 渲染清單畫面
+        function renderTodoList() {
+            todoListContainer.innerHTML = '';
+            
+            // 如果雲端資料庫裡還沒有 todoList 這個陣列，就幫它建立一個空的
+            if (!itineraryData.todoList) itineraryData.todoList = [];
+
+            itineraryData.todoList.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.className = `todo-item ${item.done ? 'done' : ''}`;
+                
+                // 自訂打勾方塊
+                const checkbox = document.createElement('div');
+                checkbox.className = `todo-checkbox ${item.done ? 'checked' : ''}`;
+                checkbox.innerHTML = '✔';
+                
+                // 事項文字
+                const textSpan = document.createElement('span');
+                textSpan.className = 'todo-text';
+                textSpan.textContent = item.text;
+                
+                // 切換打勾與取消
+                const toggleDone = () => {
+                    item.done = !item.done;
+                    saveData();
+                    renderTodoList();
+                };
+                checkbox.onclick = toggleDone;
+                textSpan.onclick = toggleDone; // 點文字也能打勾，比較好按
+
+                // 刪除按鈕
+                const delBtn = document.createElement('span');
+                delBtn.className = 'todo-delete-btn';
+                delBtn.innerHTML = '🗑️';
+                delBtn.onclick = () => {
+                    if(confirm(`確定要刪除事項「${item.text}」嗎？`)) {
+                        itineraryData.todoList.splice(index, 1);
+                        saveData();
+                        renderTodoList();
+                    }
+                };
+
+                row.appendChild(checkbox);
+                row.appendChild(textSpan);
+                row.appendChild(delBtn);
+                todoListContainer.appendChild(row);
+            });
+        }
+
+        // 點擊新增按鈕
+        if(todoAddBtn) {
+            todoAddBtn.addEventListener('click', () => {
+                const text = todoInput.value.trim();
+                if (text) {
+                    if (!itineraryData.todoList) itineraryData.todoList = [];
+                    itineraryData.todoList.push({ text: text, done: false });
+                    saveData();
+                    renderTodoList();
+                    todoInput.value = ''; // 清空輸入框
+                }
+            });
+        }
+
+        // 在輸入框按 Enter 也能新增
+        if(todoInput) {
+            todoInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') todoAddBtn.click();
+            });
+        }
+
 
     </script>
 </body>
