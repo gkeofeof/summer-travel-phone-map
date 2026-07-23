@@ -836,12 +836,25 @@
 
             // 1. 綁定「➕ 建立新行程」按鈕
             document.getElementById('create-room-btn').addEventListener('click', () => {
-                const roomTitle = prompt("📝 請輸入新行程的名稱 (例如：沖繩家族旅行)：") || "未命名行程";
-                const pwd = prompt("🔒 請為此行程設定「編輯密碼」\n（若希望所有人都能自由編輯，請直接留白按確定）：") || "";
+                // 第一步：詢問名稱
+                let roomTitle = prompt("📝 請輸入新行程的名稱 (例如：沖繩家族旅行)：");
                 
-                const newRoomId = Math.random().toString(36).substring(2, 10);
+                // 🛑 防呆 1：如果按下「取消」或按了「ESC」，直接中斷，什麼都不做
+                if (roomTitle === null) return; 
                 
-                // 寫入 Firebase (加上 title 跟 created_at)
+                // 如果什麼都沒打直接按「確定」，才給予預設名稱
+                if (roomTitle.trim() === "") roomTitle = "未命名行程";
+
+                // 第二步：詢問密碼
+                let pwd = prompt("🔒 請為此行程設定「編輯密碼」\n（若希望所有人都能自由編輯，請直接留白按確定）：");
+                
+                // 🛑 防呆 2：如果在密碼這一步才按下「取消」，一樣直接中斷
+                if (pwd === null) return; 
+                
+                // 通過以上防呆，才真正產生房間代碼並寫入資料庫
+                const newRoomId = Date.now().toString(36) + Math.random().toString(36).substring(2, 5); // 加上時間戳確保不撞名
+                
+                // 寫入 Firebase
                 db.ref(`itineraries/${newRoomId}`).set({
                     title: roomTitle,
                     password: pwd,
